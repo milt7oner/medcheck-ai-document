@@ -1,0 +1,21 @@
+# Dependencias Fronend
+pnpm create next-app frontend
+cd frontend
+pnpm add @tanstack/react-query axios
+pnpm add -D tailwindcss postcss autoprefixer eslint prettier
+# Dependencias Backend
+pnpm create nest-app backend
+cd backend
+pnpm add @nestjs/config @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt
+pnpm add @nestjs/typeorm typeorm pg
+pnpm add @prisma/client
+pnpm add class-validator class-transformer
+pnpm add axios
+pnpm add nodemailer
+pnpm add tesseract.js pdf-parse langchain
+pnpm add aws-sdk
+pnpm add mime
+pnpm add -D prisma ts-node-dev
+
+#Herramientas de desarrollo
+pnpm add -D typescript ts-node-dev eslint prettier husky lint-staged
