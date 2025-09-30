@@ -1,4 +1,4 @@
-version: "3.8"
+
 services:
   postgres:
     image: postgres:15
@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: documentsdb
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -25,7 +25,19 @@ services:
       MINIO_ROOT_PASSWORD: admin123
     volumes:
       - minio_data:/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"  
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:
   minio_data:
+  pg_data:

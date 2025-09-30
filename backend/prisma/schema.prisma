@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  STAFF
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  OK
+  NEEDS_REVIEW
+  EXPIRED
+  REJECTED
+}
+
+enum NotificationType {
+  EXPIRY
+  ANOMALY
+  UPLOAD_CONFIRMATION
+  REVIEW_REQUEST
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  role          Role           @default(USER)
+  password      String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  documents     Document[]
+  reviewedDocuments Document[] @relation("DocumentReviewer") // 👈 relación inversa
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([role])
+}
+
+model Document {
+  id            String         @id @default(uuid())
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  filename      String
+  storageKey    String
+  fileSize      Int
+  mimeType      String
+  status        DocumentStatus @default(PENDING)
+  uploadedAt    DateTime       @default(now())
+  processedAt   DateTime?
+  ocrText       String?        @db.Text
+  extractedName String?
+  extractedDate DateTime?
+  extractedType String?
+  ocrConfidence Float?
+  pages         Int?
+  reviewer      User?          @relation("DocumentReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  reviewerId    String?
+  reviewNote    String?
+  version       Int            @default(1)
+
+  notifications Notification[]   // 👈 relación inversa
+
+  @@index([userId])
+  @@index([status, uploadedAt])
+}
+
+model Notification {
+  id          String             @id @default(uuid())
+  user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId      String?
+  document    Document?          @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  documentId  String?
+  type        NotificationType
+  status      NotificationStatus @default(PENDING)
+  payload     Json?
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  attempts    Int                @default(0)
+  createdAt   DateTime           @default(now())
+
+  @@index([userId, status, scheduledAt])
+}
+
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  action    String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
