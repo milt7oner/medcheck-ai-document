@@ -76,7 +76,7 @@ model Document {
   version       Int            @default(1)
 
   notifications Notification[]   // 👈 relación inversa
-
+  ocrTextVector  Unsupported("tsvector")?
   @@index([userId])
   @@index([status, uploadedAt])
 }
