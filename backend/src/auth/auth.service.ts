@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,InternalServerErrorException
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../users/user.service';
@@ -11,20 +15,27 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signup(email: string, password: string, role:Role) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await this.userService.create({
-      email,
-      password: hashedPassword,
-      role,
-    });
-    return user;
+  async signup(email: string, password: string, role: Role) {
+    const user = await this.userService.findByEmail(email);
+    if (user) {
+      throw new ConflictException('El usuario ya existe');
+    }
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const NewUser = await this.userService.create({
+        email,
+        password: hashedPassword,
+        role,
+      });
+      return NewUser;
+    } catch (error) {}
+    throw new InternalServerErrorException('Error al crear el usuario');
   }
 
   async login(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
     if (!user) throw new UnauthorizedException('User not found');
-
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 

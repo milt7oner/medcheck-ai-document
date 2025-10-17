@@ -2,9 +2,10 @@ import { Controller, Get, Post, Body, Param, Patch, Delete,UseGuards } from '@ne
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from '../auth/roles.guard';
+
 @Controller('users')
 @UseGuards(JwtAuthGuard,RolesGuard)
 export class UserController {
